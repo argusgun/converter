@@ -1,9 +1,13 @@
 package com.test.converter.controllers;
 
+import com.test.converter.entetities.ConvertingHistory;
+import com.test.converter.entetities.User;
 import com.test.converter.entetities.ValCurs;
 import com.test.converter.entetities.Valute;
+import com.test.converter.repo.HistoryRepo;
 import com.test.converter.repo.ValCursRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +19,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -27,8 +30,12 @@ public class MainController {
     @Autowired
     private final ValCursRepo valCursRepo;
 
-    public MainController(ValCursRepo valCursRepo) {
+    @Autowired
+    private final HistoryRepo historyRepo;
+
+    public MainController(ValCursRepo valCursRepo, HistoryRepo historyRepo) {
         this.valCursRepo = valCursRepo;
+        this.historyRepo = historyRepo;
     }
 private String result="";
     @GetMapping
@@ -50,7 +57,7 @@ private String result="";
     }
 
     @PostMapping
-    public String convert(@RequestParam String listValue1, @RequestParam String listValue2, @RequestParam String countFrom, Model model){
+    public String convert(@RequestParam String listValue1, @RequestParam String listValue2, @RequestParam String countFrom, @AuthenticationPrincipal User user, Model model){
         Valute v1 = new Valute(),v2 = new Valute();
         String date =new SimpleDateFormat("dd.MM.yyyy").format(new Date());
         List<Valute> list = valCursRepo.findByDate(date).getValutes();
@@ -61,6 +68,13 @@ private String result="";
             if(v.getName().equals(listValue2)){ v2=v; break;}
         }
         result=String.valueOf(Double.parseDouble(countFrom)*Double.parseDouble(v1.getValue().replace(",","."))/v1.getNominal()/Double.parseDouble(v2.getValue().replace(",","."))*v2.getNominal());
+        if(user!=null){
+            ConvertingHistory convertingHistory=new ConvertingHistory();
+        convertingHistory.setUser(user);
+        convertingHistory.setTime(new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new Date()));
+        convertingHistory.setLog(countFrom +" "+v1.getCharCode()+ " = "+ result +" "+v2.getCharCode());
+        historyRepo.save(convertingHistory);
+        }
         model.addAttribute("lv1",v1.getName());
         model.addAttribute("lv2",v2.getName());
         model.addAttribute("result",result);
