@@ -39,7 +39,10 @@ public class MainController {
     }
 private String result="";
     @GetMapping
-    public String indexGet(@RequestParam(defaultValue = "") String result,@RequestParam(defaultValue = "") String lv1,@RequestParam(defaultValue = "") String lv2, Model model) throws JAXBException, IOException {
+    public String indexGet(@RequestParam(defaultValue = "") String result,
+                           @RequestParam(defaultValue = "") String lv1,
+                           @RequestParam(defaultValue = "") String lv2,
+                           @AuthenticationPrincipal User user,Model model) throws JAXBException, IOException {
         String date =new SimpleDateFormat("dd.MM.yyyy").format(new Date());
         model.addAttribute("date",date);
         if(valCursRepo.findByDate(date)==null) {
@@ -49,15 +52,21 @@ private String result="";
             if(valute!=null)valCursRepo.save(valute);
 
         }
+        List<ConvertingHistory> clist=historyRepo.findAllByUser(user);
         model.addAttribute("result",result);
         model.addAttribute("list",valCursRepo.findByDate(date).getValutes());
         model.addAttribute("lv1","");
         model.addAttribute("lv2","");
+        model.addAttribute("user",user);
+        model.addAttribute("clist",clist);
         return "index";
     }
 
     @PostMapping
-    public String convert(@RequestParam String listValue1, @RequestParam String listValue2, @RequestParam String countFrom, @AuthenticationPrincipal User user, Model model){
+    public String convert(@RequestParam String listValue1,
+                          @RequestParam String listValue2,
+                          @RequestParam String countFrom,
+                          @AuthenticationPrincipal User user, Model model){
         Valute v1 = new Valute(),v2 = new Valute();
         String date =new SimpleDateFormat("dd.MM.yyyy").format(new Date());
         List<Valute> list = valCursRepo.findByDate(date).getValutes();
@@ -75,11 +84,14 @@ private String result="";
         convertingHistory.setLog(countFrom +" "+v1.getCharCode()+ " = "+ result +" "+v2.getCharCode());
         historyRepo.save(convertingHistory);
         }
+        List<ConvertingHistory> clist=historyRepo.findAllByUser(user);
         model.addAttribute("lv1",v1.getName());
         model.addAttribute("lv2",v2.getName());
         model.addAttribute("result",result);
         model.addAttribute("list",valCursRepo.findByDate(date).getValutes());
         model.addAttribute("date",date);
+        model.addAttribute("user",user);
+        model.addAttribute("clist",clist);
         return "index";
     }
 

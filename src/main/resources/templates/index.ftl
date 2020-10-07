@@ -27,6 +27,15 @@
     <p><label>${result}</label></p>
     <button type="submit">Конвертировать</button>
 </form>
-
+<#if user??>
+<h2>История конвертаций</h2>
+<#if list??>
+<#list clist as l>
+<div>${l.time} ${l.log}</div>
+</#list>
+</#if>
+<button type="button"><a href="/logout">Выйти</a></button>
+<#else><button type="button"><a href="/login">Войти через Google</a></button>
+</#if>
 </body>
 </html>
