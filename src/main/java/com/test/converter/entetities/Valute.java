@@ -1,6 +1,8 @@
 package com.test.converter.entetities;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -9,18 +11,29 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "Valute")
 public class Valute {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    public String getCbId() {
+        return cbId;
+    }
+    @XmlAttribute(name = "ID")
+    public void setCbId(String cbId) {
+        this.cbId = cbId;
+    }
+
+    private String cbId;
     private String numCode;
     private String charCode;
     private int nominal;
     private String name;
     private String value;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
-    @XmlAttribute(name = "ID")
-    public void setId(String id) {
+//    @XmlAttribute(name = "ID")
+    public void setId(Long id) {
         this.id = id;
     }
 

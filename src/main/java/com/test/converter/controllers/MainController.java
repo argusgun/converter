@@ -43,12 +43,18 @@ private String result="";
                            @RequestParam(defaultValue = "") String lv1,
                            @RequestParam(defaultValue = "") String lv2,
                            @AuthenticationPrincipal User user,Model model) throws JAXBException, IOException {
-        String date =new SimpleDateFormat("dd.MM.yyyy").format(new Date());
+        Date d = new Date();
+//        d.setTime((new Date().getTime())-3600*24*1000);
+        String date =new SimpleDateFormat("dd.MM.yyyy").format(d);
+        System.out.println(date);
         model.addAttribute("date",date);
         if(valCursRepo.findByDate(date)==null) {
                 JAXBContext jaxbContext = JAXBContext.newInstance(ValCurs.class);
                 Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-                ValCurs valute= (ValCurs) jaxbUnmarshaller.unmarshal(new URL("http://www.cbr.ru/scripts/XML_daily.asp?date_req="+new SimpleDateFormat("dd/MM/yyyy").format(new Date())).openStream());
+                ValCurs valute= (ValCurs) jaxbUnmarshaller.unmarshal(new URL("http://www.cbr.ru/scripts/XML_daily.asp?date_req="+new SimpleDateFormat("dd/MM/yyyy").format(d)).openStream());
+                for(Valute v:valute.getValutes()){
+                    System.out.println(v.toString());
+                }
             if(valute!=null)valCursRepo.save(valute);
 
         }
@@ -67,8 +73,10 @@ private String result="";
                           @RequestParam String listValue2,
                           @RequestParam String countFrom,
                           @AuthenticationPrincipal User user, Model model){
+        Date d = new Date();
+//        d.setTime(new Date().getTime()-3600*24*1000);
         Valute v1 = new Valute(),v2 = new Valute();
-        String date =new SimpleDateFormat("dd.MM.yyyy").format(new Date());
+        String date =new SimpleDateFormat("dd.MM.yyyy").format(d);
         List<Valute> list = valCursRepo.findByDate(date).getValutes();
         for (Valute v:list){
             if(v.getName().equals(listValue1)){ v1=v; break;}
@@ -80,7 +88,7 @@ private String result="";
         if(user!=null){
             ConvertingHistory convertingHistory=new ConvertingHistory();
         convertingHistory.setUser(user);
-        convertingHistory.setTime(new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new Date()));
+        convertingHistory.setTime(new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(d));
         convertingHistory.setLog(countFrom +" "+v1.getCharCode()+ " = "+ result +" "+v2.getCharCode());
         historyRepo.save(convertingHistory);
         }
