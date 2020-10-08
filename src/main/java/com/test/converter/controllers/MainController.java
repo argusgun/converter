@@ -25,7 +25,7 @@ import java.util.Date;
 import java.util.List;
 
 @Controller
-@RequestMapping
+@RequestMapping("/")
 public class MainController {
     @Autowired
     private final ValCursRepo valCursRepo;
@@ -38,7 +38,7 @@ public class MainController {
         this.historyRepo = historyRepo;
     }
 private String result="";
-    @GetMapping
+    @GetMapping("converter")
     public String indexGet(@RequestParam(defaultValue = "") String result,
                            @RequestParam(defaultValue = "") String lv1,
                            @RequestParam(defaultValue = "") String lv2,
@@ -46,7 +46,7 @@ private String result="";
         Date d = new Date();
 //        d.setTime((new Date().getTime())-3600*24*1000);
         String date =new SimpleDateFormat("dd.MM.yyyy").format(d);
-        System.out.println(date);
+//        System.out.println(date);
         model.addAttribute("date",date);
         if(valCursRepo.findByDate(date)==null) {
                 JAXBContext jaxbContext = JAXBContext.newInstance(ValCurs.class);
@@ -67,8 +67,13 @@ private String result="";
         model.addAttribute("clist",clist);
         return "index";
     }
+    @GetMapping
+    public String redirect()
+    {
+        return "redirect:/converter";
+    }
 
-    @PostMapping
+    @PostMapping("converter")
     public String convert(@RequestParam String listValue1,
                           @RequestParam String listValue2,
                           @RequestParam String countFrom,

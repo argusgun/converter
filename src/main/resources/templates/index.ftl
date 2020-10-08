@@ -7,7 +7,7 @@
 <body>
 <h4>Converter</h4>
 <h3>${date}</h3>
-<form method="post" action="/">
+<form method="post" action="/converter">
 <p><input type="text" name="countFrom"><select name="listValue1">
         <#list list as r>
             <#if lv1==r.name>
